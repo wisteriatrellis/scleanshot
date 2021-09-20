@@ -19,10 +19,11 @@ import java.awt.event.MouseAdapter
 
 class MyPanel (
   size: Dimension,
-  override val filename: String = "capture",
+  override val fileMainName: String = "capture",
   override val imageType: String = "png"
 ) extends JPanel
-    with MouseListener with MouseMotionListener with ScleanshotIO {
+    with MouseListener with MouseMotionListener
+    with ScleanshotIO with FileNameMaker {
 
   var beginX, beginY: Int = 0
   val selectedAreaColor = new Color(0.0f, 0.0f, 0.0f, 0.0f)
@@ -53,7 +54,8 @@ class MyPanel (
           p.x - beginX, p.y - beginY
         )
       ),
-      seqFileNamePath()
+      seqFileNamePath(),
+      imageType
     )
     System.exit(0)
   }
@@ -104,28 +106,48 @@ class MyWindow(
 
 
 trait FileNameMaker {
-  def listFilesIn(dir: String): Unit = {
-    val files = new File(dir).listFiles()
-    files
-      .map(_.getName())
-      .foreach(println)
-  }
+  val fileMainName: String
+  val imageType: String
 
-  def fileNumberOf(filename: String): Int = filename match {
-    case "capture001.png" => 1
-    case "capture020.png" => 20
-    case "capture300.png" => 300
+  def listFilesIn(dir: String): Array[String] = 
+    new File(dir)
+      .listFiles()
+      .map(_.getName())
+
+  def fileNumberOf(filename: String): Int =
+    removePreSuf(filename)
+      .replaceAll("^0+(?!$)", "")
+      .toInt
+  
+  // need error handling
+  private def validPreSuf(filename: String): Boolean =
+    filename.startsWith(fileMainName) && filename.endsWith("." + imageType)
+
+  private def removePreSuf(filename: String): String =
+    filename
+      .replace(fileMainName, "")
+      .replace("." + imageType, "")
+
+  def maxFileNumberIn(files: Array[String]): Int =
+    files
+      .filter(validPreSuf)
+      .map(removePreSuf)
+      .map(fileNumberOf)
+      .maxOption match {
+        case Some(n) => n
+        case None => 0
+      }
+
+  def seqFileNamePath(): File = {
+    val filePath: File = new File(".", fileMainName + "." + imageType)
+    //listFilesIn(".")
+    //???
+    filePath
   }
-  //def seqFileNamePath(): File = {
-  //  ???
-  //}
 }
 
 
 trait ScleanshotIO {
-  val filename: String
-  val imageType: String
-
   def capture(
     rect: Rectangle
   ): BufferedImage = {
@@ -135,30 +157,11 @@ trait ScleanshotIO {
     screenShot
   }
 
-  def seqFileNamePath(): File = {
-    val filePath: File = new File(".", filename + ".png")
-    listFilesIn(".")
-    //???
-    filePath
-  }
-
-  def listFilesIn(dir: String): Unit = {
-    val files = new File(dir).listFiles()
-    files
-      .map(_.getName())
-      .foreach(println)
-  }
-
-  def fileNumberOf(filename: String): Int = filename match {
-    case "capture001.png" => 1
-    case "capture020.png" => 20
-    case "capture300.png" => 300
-  }
-
 
   def save(
     screenShot: BufferedImage,
     filePath: File,
+    imageType: String
   ): Unit = {
     ImageIO.write(screenShot, imageType, filePath)
   }
@@ -174,6 +177,7 @@ object Main {
     val window = new MyWindow(screenSize)
     val panel = new MyPanel(screenSize, args(0))
     window.add(panel)
-
+    window.setVisible(true)
+    window.toFront()
   }
 }
