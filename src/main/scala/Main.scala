@@ -1,9 +1,5 @@
 package com.scleanshot
 
-//import java.awt.Robot
-//import java.awt.event.InputEvent
-//import java.awt.Toolkit
-//import java.a
 import java.awt._
 import java.io.File
 import javax.imageio.ImageIO
@@ -20,7 +16,7 @@ import java.awt.event.MouseAdapter
 class MyPanel (
   size: Dimension,
   override val fileMainName: String = "capture",
-  override val imageType: String = "png"
+  override val extension: String = "png"
 ) extends JPanel
     with MouseListener with MouseMotionListener
     with ScleanshotIO with FileNameMaker {
@@ -55,7 +51,7 @@ class MyPanel (
         )
       ),
       seqFileNamePath(),
-      imageType
+      extension
     )
     System.exit(0)
   }
@@ -107,7 +103,7 @@ class MyWindow(
 
 trait FileNameMaker {
   val fileMainName: String
-  val imageType: String
+  val extension: String
 
   def listFilesIn(dir: String): Array[String] = 
     new File(dir)
@@ -117,28 +113,25 @@ trait FileNameMaker {
   def fileNumberOf(filename: String): Option[Int] =
     removePreSuf(filename)
       .toIntOption
-      //.replaceAll("^0+(?!$)", "")
   
-  // need error handling
   private def validPreSuf(filename: String): Boolean =
-    filename.startsWith(fileMainName) && filename.endsWith("." + imageType)
+    filename.startsWith(fileMainName) && filename.endsWith("." + extension)
 
   private def removePreSuf(filename: String): String =
     filename
       .replace(fileMainName, "")
-      .replace("." + imageType, "")
+      .replace("." + extension, "")
 
   def maxFileNumberIn(files: Array[String]): Int =
     files
       .filter(validPreSuf)
-      //.map(removePreSuf)
       .flatMap(fileNumberOf)
       .maxOption
       .getOrElse(0)
 
   def newFileName(): String = {
     val nextNumber: Int = maxFileNumberIn(listFilesIn(".")) + 1
-    fileMainName + nextNumber + "." + imageType
+    fileMainName + nextNumber + "." + extension
   }
 
 
@@ -163,9 +156,9 @@ trait ScleanshotIO {
   def save(
     screenShot: BufferedImage,
     filePath: File,
-    imageType: String
+    extension: String
   ): Unit = {
-    ImageIO.write(screenShot, imageType, filePath)
+    ImageIO.write(screenShot, extension, filePath)
   }
 }
 

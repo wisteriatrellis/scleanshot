@@ -6,7 +6,7 @@ import org.scalatest.funsuite.AnyFunSuite
 class FileNameMakerTest extends AnyFunSuite {
   val fileNameMaker = new {
     val fileMainName = "capture"
-    val imageType = "png"
+    val extension = "png"
   } with FileNameMaker
 
   test("fileNumberOf") {
