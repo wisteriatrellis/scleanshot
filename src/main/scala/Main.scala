@@ -17,7 +17,7 @@ class MyPanel (
   size: Dimension,
   val parentComponent: JWindow,
   override val fileMainName: String = "capture",
-  override val extension: String = "png"
+  override val fnext: String = "png"
 ) extends JPanel
     with MouseListener with MouseMotionListener
     with ScleanshotIO with FileNameMaker {
@@ -52,7 +52,7 @@ class MyPanel (
         )
       ),
       seqFileNamePath(),
-      extension
+      fnext
     )
     // System.exit(0)
     parentComponent.dispose()
@@ -105,7 +105,7 @@ class MyWindow(
 
 trait FileNameMaker {
   val fileMainName: String
-  val extension: String
+  val fnext: String
 
   def listFilesIn(dir: String): Array[String] = 
     new File(dir)
@@ -117,12 +117,12 @@ trait FileNameMaker {
       .toIntOption
   
   private def validPreSuf(filename: String): Boolean =
-    filename.startsWith(fileMainName) && filename.endsWith("." + extension)
+    filename.startsWith(fileMainName) && filename.endsWith("." + fnext)
 
   private def removePreSuf(filename: String): String =
     filename
       .replace(fileMainName, "")
-      .replace("." + extension, "")
+      .replace("." + fnext, "")
 
   def maxFileNumberIn(files: Array[String]): Int =
     files
@@ -133,7 +133,7 @@ trait FileNameMaker {
 
   def newFileName(): String = {
     val nextNumber: Int = maxFileNumberIn(listFilesIn(".")) + 1
-    fileMainName + nextNumber + "." + extension
+    fileMainName + nextNumber + "." + fnext
   }
 
 
@@ -158,9 +158,9 @@ trait ScleanshotIO {
   def save(
     screenShot: BufferedImage,
     filePath: File,
-    extension: String
+    fnext: String
   ): Unit = {
-    ImageIO.write(screenShot, extension, filePath)
+    ImageIO.write(screenShot, fnext, filePath)
   }
 }
 
