@@ -114,10 +114,10 @@ trait FileNameMaker {
       .listFiles()
       .map(_.getName())
 
-  def fileNumberOf(filename: String): Int =
+  def fileNumberOf(filename: String): Option[Int] =
     removePreSuf(filename)
-      .replaceAll("^0+(?!$)", "")
-      .toInt
+      .toIntOption
+      //.replaceAll("^0+(?!$)", "")
   
   // need error handling
   private def validPreSuf(filename: String): Boolean =
@@ -131,17 +131,19 @@ trait FileNameMaker {
   def maxFileNumberIn(files: Array[String]): Int =
     files
       .filter(validPreSuf)
-      .map(removePreSuf)
-      .map(fileNumberOf)
-      .maxOption match {
-        case Some(n) => n
-        case None => 0
-      }
+      //.map(removePreSuf)
+      .flatMap(fileNumberOf)
+      .maxOption
+      .getOrElse(0)
+
+  def newFileName(): String = {
+    val nextNumber: Int = maxFileNumberIn(listFilesIn(".")) + 1
+    fileMainName + nextNumber + "." + imageType
+  }
+
 
   def seqFileNamePath(): File = {
-    val filePath: File = new File(".", fileMainName + "." + imageType)
-    //listFilesIn(".")
-    //???
+    val filePath: File = new File(".", newFileName())
     filePath
   }
 }

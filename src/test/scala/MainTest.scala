@@ -10,9 +10,10 @@ class FileNameMakerTest extends AnyFunSuite {
   } with FileNameMaker
 
   test("fileNumberOf") {
-    assert(fileNameMaker.fileNumberOf("capture001.png") === 1)
-    assert(fileNameMaker.fileNumberOf("capture020.png") === 20)
-    assert(fileNameMaker.fileNumberOf("capture300.png") === 300)
+    assert(fileNameMaker.fileNumberOf("capture001.png") === Some(1))
+    assert(fileNameMaker.fileNumberOf("capture020.png") === Some(20))
+    assert(fileNameMaker.fileNumberOf("capture300.png") === Some(300))
+    assert(fileNameMaker.fileNumberOf("capture400.svg") === None)
   }
 
   test("maxFileNumberIn") {
