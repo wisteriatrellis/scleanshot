@@ -15,6 +15,7 @@ import java.awt.event.MouseAdapter
 
 class MyPanel (
   size: Dimension,
+  val parentComponent: JWindow,
   override val fileMainName: String = "capture",
   override val extension: String = "png"
 ) extends JPanel
@@ -53,7 +54,8 @@ class MyPanel (
       seqFileNamePath(),
       extension
     )
-    System.exit(0)
+    // System.exit(0)
+    parentComponent.dispose()
   }
   def mouseClicked(e: MouseEvent): Unit = {}
   def mouseMoved(e: MouseEvent): Unit = {}
@@ -167,10 +169,10 @@ trait ScleanshotIO {
 object Main {
   def main(args: Array[String]): Unit = {
     val screenSize: Dimension = Toolkit
-      .getDefaultToolkit()
-      .getScreenSize()
+    .getDefaultToolkit()
+    .getScreenSize()
     val window = new MyWindow(screenSize)
-    val panel = new MyPanel(screenSize, args(0))
+    val panel = new MyPanel(screenSize, window, args(0))
     window.add(panel)
     window.setVisible(true)
     window.toFront()
