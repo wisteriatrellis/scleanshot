@@ -15,7 +15,7 @@ import java.awt.event.MouseAdapter
 
 class MyPanel (
   size: Dimension,
-  val parentComponent: JWindow,
+  val ownerComponent: JWindow,
   override val fileMainName: String = "capture",
   override val fnext: String = "png"
 ) extends JPanel
@@ -43,7 +43,7 @@ class MyPanel (
     val p = e.getPoint()
     val g = this.getGraphics()
     clearAll(g)
-    Thread.sleep(1000)
+    Thread.sleep(500)
     save(
       capture(
         new Rectangle(
@@ -55,7 +55,7 @@ class MyPanel (
       fnext
     )
     // System.exit(0)
-    parentComponent.dispose()
+    ownerComponent.dispose()
   }
   def mouseClicked(e: MouseEvent): Unit = {}
   def mouseMoved(e: MouseEvent): Unit = {}
@@ -132,14 +132,18 @@ trait FileNameMaker {
       .getOrElse(0)
 
   def newFileName(): String = {
-    val nextNumber: Int = maxFileNumberIn(listFilesIn(".")) + 1
-    fileMainName + nextNumber + "." + fnext
+    fileMainName +
+      String.format(
+        "%03d",
+        maxFileNumberIn(listFilesIn(".")) + 1
+      ) +
+      "." + fnext
   }
 
-
   def seqFileNamePath(): File = {
-    val filePath: File = new File(".", newFileName())
-    filePath
+    val filename = newFileName()
+    println(s"new file: $filename")
+    new File(".", filename)
   }
 }
 
@@ -153,7 +157,6 @@ trait ScleanshotIO {
       robot.createScreenCapture(rect)
     screenShot
   }
-
 
   def save(
     screenShot: BufferedImage,
