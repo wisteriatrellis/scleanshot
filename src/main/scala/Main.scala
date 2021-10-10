@@ -17,7 +17,7 @@ class MyPanel (
   size: Dimension,
   val ownerComponent: JWindow,
   override val fileMainName: String = "capture",
-  override val fnext: String = "png"
+  override val fnExt: String = "png"
 ) extends JPanel
     with MouseListener with MouseMotionListener
     with ScleanshotIO with FileNameMaker {
@@ -43,7 +43,8 @@ class MyPanel (
     val p = e.getPoint()
     val g = this.getGraphics()
     clearAll(g)
-    Thread.sleep(500)
+    println("[info] saving...")
+    Thread.sleep(800)
     save(
       capture(
         new Rectangle(
@@ -51,10 +52,9 @@ class MyPanel (
           p.x - beginX, p.y - beginY
         )
       ),
-      seqFileNamePath(),
-      fnext
+      newFileName(),
+      fnExt
     )
-    // System.exit(0)
     ownerComponent.dispose()
   }
   def mouseClicked(e: MouseEvent): Unit = {}
@@ -105,7 +105,7 @@ class MyWindow(
 
 trait FileNameMaker {
   val fileMainName: String
-  val fnext: String
+  val fnExt: String
 
   def listFilesIn(dir: String): Array[String] = 
     new File(dir)
@@ -117,12 +117,12 @@ trait FileNameMaker {
       .toIntOption
   
   private def validPreSuf(filename: String): Boolean =
-    filename.startsWith(fileMainName) && filename.endsWith("." + fnext)
+    filename.startsWith(fileMainName) && filename.endsWith("." + fnExt)
 
   private def removePreSuf(filename: String): String =
     filename
       .replace(fileMainName, "")
-      .replace("." + fnext, "")
+      .replace("." + fnExt, "")
 
   def maxFileNumberIn(files: Array[String]): Int =
     files
@@ -137,13 +137,7 @@ trait FileNameMaker {
         "%03d",
         maxFileNumberIn(listFilesIn(".")) + 1
       ) +
-      "." + fnext
-  }
-
-  def seqFileNamePath(): File = {
-    val filename = newFileName()
-    println(s"new file: $filename")
-    new File(".", filename)
+      "." + fnExt
   }
 }
 
@@ -160,10 +154,11 @@ trait ScleanshotIO {
 
   def save(
     screenShot: BufferedImage,
-    filePath: File,
-    fnext: String
+    filename: String,
+    fnExt: String
   ): Unit = {
-    ImageIO.write(screenShot, fnext, filePath)
+    ImageIO.write(screenShot, fnExt, new File(".", filename))
+    println(s"[success] new file: $filename")
   }
 }
 
@@ -178,6 +173,7 @@ object Main {
     val panel = new MyPanel(screenSize, window, args(0))
     window.add(panel)
     window.setVisible(true)
+    Thread.sleep(200)
     window.toFront()
   }
 }
